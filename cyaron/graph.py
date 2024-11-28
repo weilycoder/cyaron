@@ -1,7 +1,7 @@
 from .utils import *
+from .vector import Vector
 import random
 from typing import TypeVar, Callable
-
 
 __all__ = ["Edge", "Graph"]
 
@@ -46,7 +46,7 @@ class Graph:
         """
         self.directed = directed
         self.edges = [[] for i in range(point_count + 1)]
-    
+
     def edge_count(self):
         """edge_count(self) -> int
             Return the count of the edges in the graph.
@@ -322,9 +322,11 @@ class Graph:
         self_loop = kwargs.get("self_loop", True)
         repeated_edges = kwargs.get("repeated_edges", True)
         if not repeated_edges:
-            max_edge =  Graph._calc_max_edge(point_count, directed, self_loop)
+            max_edge = Graph._calc_max_edge(point_count, directed, self_loop)
             if edge_count > max_edge:
-                raise Exception("the number of edges of this kind of graph which has %d vertexes must be less than or equal to %d." % (point_count, max_edge))
+                raise Exception(
+                    "the number of edges of this kind of graph which has %d vertexes must be less than or equal to %d."
+                    % (point_count, max_edge))
 
         weight_limit = kwargs.get("weight_limit", (1, 1))
         if not list_like(weight_limit):
@@ -379,9 +381,11 @@ class Graph:
         repeated_edges = kwargs.get("repeated_edges", True)
         loop = kwargs.get("loop", False)
         if not repeated_edges:
-            max_edge =  Graph._calc_max_edge(point_count, not loop, self_loop)
+            max_edge = Graph._calc_max_edge(point_count, not loop, self_loop)
             if edge_count > max_edge:
-                raise Exception("the number of edges of this kind of graph which has %d vertexes must be less than or equal to %d." % (point_count, max_edge))
+                raise Exception(
+                    "the number of edges of this kind of graph which has %d vertexes must be less than or equal to %d."
+                    % (point_count, max_edge))
 
         weight_limit = kwargs.get("weight_limit", (1, 1))
         if not list_like(weight_limit):
@@ -448,9 +452,11 @@ class Graph:
         self_loop = kwargs.get("self_loop", True)
         repeated_edges = kwargs.get("repeated_edges", True)
         if not repeated_edges:
-            max_edge =  Graph._calc_max_edge(point_count, False, self_loop)
+            max_edge = Graph._calc_max_edge(point_count, False, self_loop)
             if edge_count > max_edge:
-                raise Exception("the number of edges of this kind of graph which has %d vertexes must be less than or equal to %d." % (point_count, max_edge))
+                raise Exception(
+                    "the number of edges of this kind of graph which has %d vertexes must be less than or equal to %d."
+                    % (point_count, max_edge))
 
         weight_limit = kwargs.get("weight_limit", (1, 1))
         if not list_like(weight_limit):
@@ -486,7 +492,7 @@ class Graph:
             i += 1
 
         return graph
-    
+
     @staticmethod
     def connected(point_count, edge_count, directed=False, **kwargs):
         """connected(point_count, edge_count, **kwargs) -> Graph
@@ -549,7 +555,7 @@ class Graph:
             graph.add_edge(u, v, weight=weight_gen())
 
         return graph
-    
+
     @staticmethod
     def _calc_max_edge(point_count, directed, self_loop):
         max_edge = point_count * (point_count - 1)
@@ -558,6 +564,24 @@ class Graph:
         if self_loop:
             max_edge += point_count
         return max_edge
+
+    @staticmethod
+    def forest(point_count, tree_count, **kwargs):
+        """
+        Return a forest with point_count vertexes and tree_count trees.
+        Args:
+            point_count: the count of vertexes
+            tree_count: the count of trees
+        """
+        if tree_count <= 0 or tree_count > point_count:
+            raise ValueError("tree_count must be between 1 and point_count")
+        tree = Graph.tree(point_count, **kwargs)
+        tree_edges = list(tree.iterate_edges())
+        result = Graph(point_count, tree.directed)
+        need_add = random.sample(tree_edges, len(tree_edges) - tree_count + 1)
+        for edge in need_add:
+            result.add_edge(edge.start, edge.end, weight=edge.weight)
+        return result
 
 
 class GraphMatrix:
@@ -587,7 +611,8 @@ class GraphMatrix:
                 self.matrix[edge.start][edge.end], edge)
 
     def __str__(self):
-        return '\n'.join([' '.join(map(str, row[1:])) for row in self.matrix[1:]])
+        return '\n'.join(
+            [' '.join(map(str, row[1:])) for row in self.matrix[1:]])
 
     def __call__(self, u: int, v: int):
         return self.matrix[u][v]
