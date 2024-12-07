@@ -1,7 +1,9 @@
-from .utils import *
-from .vector import Vector
+import math
 import random
-from typing import TypeVar, Callable
+import itertools
+
+from .utils import *
+from typing import TypeVar, Callable, Tuple, Union, List, Iterable, cast
 
 __all__ = ["Edge", "Graph"]
 
@@ -325,6 +327,46 @@ class Graph:
 
             i += 1
         return graph
+
+    @staticmethod
+    def lattice(dim: Union[List[int], Tuple[int, ...]],
+                nei: int = 1,
+                directed: bool = False,
+                mutual: bool = True,
+                circular: Union[bool, Iterable[bool]] = True):
+        g = Graph(math.prod(dim), directed)
+
+        num = len(dim)
+        try:
+            circular = iter(cast(Iterable[bool], circular))
+            circular = itertools.chain(circular, itertools.repeat(True))
+            circular = itertools.islice(circular, num)
+        except TypeError:
+            circular = itertools.repeat(cast(bool, circular), num)
+        circular = list(circular)
+
+        pre_prod = [1] + list(dim[0:-1])
+        for i in range(1, num):
+            pre_prod[i] *= pre_prod[i - 1]
+
+        for d in itertools.product(*map(lambda c: range(c), dim)):
+            u = math.sumprod(d, pre_prod)
+            for i, cir in zip(range(num), circular):
+                flag, v = d[i], u
+                for _ in range(nei):
+                    flag += 1
+                    v += pre_prod[i]
+                    if flag == dim[i]:
+                        if cir and dim[i] > 2:
+                            v -= pre_prod[i] * flag
+                            flag = 0
+                        else:
+                            break
+                    g.add_edge(u + 1, v + 1)
+                    if directed and mutual:
+                        g.add_edge(v + 1, u + 1)
+
+        return g
 
     @staticmethod
     def DAG(point_count, edge_count, **kwargs):
