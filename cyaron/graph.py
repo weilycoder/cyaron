@@ -3,7 +3,7 @@ import random
 import itertools
 
 from .utils import *
-from typing import TypeVar, Callable, Tuple, Union, List, Iterable, cast
+from typing import TypeVar, Callable, Tuple, Union, List, Iterable, Sequence, cast
 
 __all__ = ["Edge", "Graph"]
 
@@ -329,7 +329,7 @@ class Graph:
         return graph
 
     @staticmethod
-    def lattice(dim: Union[List[int], Tuple[int, ...]],
+    def lattice(dim: Sequence[int],
                 nei: int = 1,
                 directed: bool = False,
                 mutual: bool = True,
