@@ -334,6 +334,22 @@ class Graph:
                 directed: bool = False,
                 mutual: bool = True,
                 circular: Union[bool, Iterable[bool]] = True):
+        """Factory method. Create a regular square lattice of the chosen size.
+
+        Args:
+            dim (Sequence[int]):
+                list with the dimensions of the lattice
+            nei (int, optional):
+                value giving the distance (number of steps) within which
+                two vertices will be connected. Defaults to 1.
+            directed (bool, optional):
+                whether to create a directed graph. Defaults to False.
+            mutual (bool, optional):
+                whether to create all connections as mutual in case of
+                a directed graph. Defaults to True.
+            circular (Union[bool, Iterable[bool]], optional):
+                whether the generated lattice is periodic. Defaults to True.
+        """
         g = Graph(math.prod(dim), directed)
 
         num = len(dim)
@@ -350,7 +366,7 @@ class Graph:
             pre_prod[i] *= pre_prod[i - 1]
 
         for d in itertools.product(*map(lambda c: range(c), dim)):
-            u = math.sumprod(d, pre_prod)
+            u = sum(a * b for a, b in zip(d, pre_prod))
             for i, cir in zip(range(num), circular):
                 flag, v = d[i], u
                 for _ in range(nei):
